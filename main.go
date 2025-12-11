@@ -43,8 +43,20 @@ func getBlogs(w http.ResponseWriter, r *http.Request) {
 
 	DB.Find(&blogs)
 
-	tmpl := template.Must(template.ParseFiles("index.html"))
+	tmpl := template.Must(template.ParseFiles("blogs.html"))
 	tmpl.Execute(w, blogs)
+}
+
+func getBlog(w http.ResponseWriter, r *http.Request) {
+	var blog Blog
+
+	err := DB.Where("id = ?", r.PathValue("id")).First(&blog).Error
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpl := template.Must(template.ParseFiles("blog.html"))
+	tmpl.Execute(w, blog)
 }
 
 func createBlog(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +74,7 @@ func main() {
 
 	mux.HandleFunc("GET /blogs", getBlogs)
 	mux.HandleFunc("POST /blogs", createBlog)
+	mux.HandleFunc("GET /blogs/{id}", getBlog)
 
 	log.Print("Listening...")
 
